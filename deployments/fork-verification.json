@@ -1,11 +1,11 @@
 {
   "localOnly": true,
   "chainId": 677,
-  "checkedAt": "2026-10-18T13:13:53.156Z",
+  "checkedAt": "2026-10-18T20:24:44.255Z",
   "sherhood": {
-    "pool": "0xE3f4BAD345E1CFe523f0327c5b683AEAf4567A8F",
-    "card": "1",
-    "claimedWBOT": "399299124984348877",
-    "flow": "create → USDT deposit → real BDEX swap → reveal → WBOT claim"
+    "vault": "0xF4b670213f3925D13C814CF1ca1222B77F0829e8",
+    "shares": "78791452",
+    "usdtFromRedeem": "38887537",
+    "flow": "create → raise → finalize (WBOT, CA via WBOT, FLOW, USDT) → claim → late join → DAO vote → rebalance → redeem in kind → redeem to USDT"
   }
 }

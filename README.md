@@ -1,6 +1,6 @@
 # Sherhood
 
-**Pool USDT. Collect your share of BOT.** The Sherhood pool and collectible protocol, adapted to USDT and wrapped BOT on BOT Chain.
+**Pick a basket. Fund it together.** Creators design a token basket, the community funds it in USDT, and holders steer it onchain. A hedge DAO on BOT Chain.
 
 **Status:** contracts are tested on a BOT Chain mainnet fork; the mainnet deployment is pending.
 
@@ -11,30 +11,22 @@
 
 ## How it works
 
-1. **Join a pool.** Deposit USDT into an instant solo pool or a community pool with a funding goal.
-2. **Mint a Sherd.** Every deposit mints a collectible card. When the pool fills, its USDT buys WBOT on BDEX.
-3. **Reveal and claim.** Block entropy reveals each card's share. Claim your WBOT or sell the card for USDT.
+1. **Design a basket.** Pick up to five BDEX-traded tokens and their weights, a USDT goal, a raise window, fees and how the basket is governed.
+2. **Raise, then trade.** Backers deposit USDT. When the goal is met the creator buys the whole basket in one go; a missed goal refunds everyone.
+3. **Hold, steer, exit.** Shares track your slice of every token. Late joiners pay a higher fee, holders vote on changes, and anyone redeems after the lockup.
 
 ## Features
 
-- **Real onchain assets.** Pools buy WBOT through the live BDEX USDT/WBOT pool.
-- **Collectible cards.** Each Sherd is an NFT that carries its share of the pool until claimed.
-- **Built-in market.** List or buy revealed Sherds for USDT in the card marketplace.
-- **Protected principal.** Underfunded pools can be cancelled after their deadline for a full USDT refund.
+- **Three governance modes.** Fixed baskets never change, managed baskets rebalance behind a 24-hour timelock, DAO baskets change only by holder vote.
+- **Manipulation-resistant shares.** Shares are priced from the vault's own holdings, never from DEX prices, so pumping a pool cannot mint extra shares.
+- **Refunds built in.** Missed goals and unfinalized raises return every USDT. Raise fees are only charged when the basket launches.
+- **Exit your way.** Redeem in kind for your slice of each token, or sell it back to USDT with your own minimum output.
 
 ## Contracts
 
 | Contract | BOT Chain mainnet |
 |---|---|
-| `BotSwapAdapter` | Pending mainnet deployment |
-| `BotEntropy` | Pending mainnet deployment |
-| `TreasuryDirect` | Pending mainnet deployment |
-| `PotCard` | Pending mainnet deployment |
-| `PotFactoryV2` | Pending mainnet deployment |
-| `RevealEngine` | Pending mainnet deployment |
-| `AssetManager` | Pending mainnet deployment |
-| `StockTokenRegistry` | Pending mainnet deployment |
-| `CardMarketplace` | Pending mainnet deployment |
+| `HedgeFactory` | Pending mainnet deployment |
 
 BOT Chain infrastructure used: USDT `0xaBabc7Ddc03e501d190C676BF3d92ef0e6e87a3C`, WBOT `0xD5452816194a3784dBa983426cCe7c122F4abd30`, BDEX router `0x07032d47A1b9f8460cBeE9dC17c1d3E438693929`, BDEX QuoterV2 `0x034A705b36067cff99ABf5C662Be881cBd8d0176`.
 

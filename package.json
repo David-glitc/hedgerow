@@ -21,7 +21,7 @@
     "esbuild": "0.28.2",
     "@playwright/test": "1.56.1"
   },
-  "description": "The Sherhood pool and collectible protocol, adapted to USDT and wrapped BOT on BOT Chain.",
+  "description": "Creators design a token basket, the community funds it in USDT, and holders steer it onchain. A hedge DAO on BOT Chain.",
   "license": "MIT",
   "repository": "https://github.com/David-glitc/sherhood-botchain",
   "homepage": "https://sherhood-botchain.davidopuene8.workers.dev"
