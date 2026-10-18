@@ -1,13 +1,13 @@
-# Sherhood
+# Hedgerow
 
 **Pick a basket. Fund it together.** Creators design a token basket, the community funds it in USDT, and holders steer it onchain. A hedge DAO on BOT Chain.
 
 **Status:** contracts are tested on a BOT Chain mainnet fork; the mainnet deployment is pending.
 
-- Website and app: https://sherhood-botchain.davidopuene8.workers.dev (app at [`/app/`](https://sherhood-botchain.davidopuene8.workers.dev/app/))
+- Website and app: https://hedgerow-botchain.davidopuene8.workers.dev (app at [`/app/`](https://hedgerow-botchain.davidopuene8.workers.dev/app/))
 - Network: BOT Chain mainnet, chain ID 677 · [BOT Chain](https://www.botchain.ai/) · [BOTScan](https://scan.botchain.ai/)
 
-![Sherhood landing page](docs/sherhood-landing-1280.png)
+![Hedgerow landing page](docs/hedgerow-landing-1280.png)
 
 ## How it works
 
@@ -37,15 +37,15 @@ Source: [`contracts/src`](contracts/src). Tests: [`contracts/test`](contracts/te
 Requires Node 20+, [Foundry](https://getfoundry.sh) and Python 3.
 
 ```bash
-git clone --recursive https://github.com/David-glitc/sherhood-botchain.git
-cd sherhood-botchain
+git clone --recursive https://github.com/David-glitc/hedgerow.git
+cd hedgerow
 npm ci
 npm test              # forge test
-npm run build         # landing page + app into dist/sherhood
+npm run build         # landing page + app into dist/hedgerow
 npm run preview       # http://127.0.0.1:8771
 ```
 
-`npm run build` writes `dist/sherhood/index.html` (landing page), `dist/sherhood/app/` (the dApp) and a Cloudflare Workers bundle under `sites/`.
+`npm run build` writes `dist/hedgerow/index.html` (landing page), `dist/hedgerow/app/` (the dApp) and a Cloudflare Workers bundle under `sites/`.
 
 ### Wallets
 

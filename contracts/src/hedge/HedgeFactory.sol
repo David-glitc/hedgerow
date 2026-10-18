@@ -4,7 +4,7 @@ import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
 import {HedgeVault} from "./HedgeVault.sol";
 import {IBotV3PathRouter,IBotV3Factory} from "../interfaces/IBotV3Router.sol";
 
-/// @notice Deploys Sherhood hedge vaults: creator-picked USDT baskets bought through BDEX.
+/// @notice Deploys Hedgerow hedge vaults: creator-picked USDT baskets bought through BDEX.
 contract HedgeFactory {
     uint256 public constant MAX_COMPONENTS = 5;
     uint16 public constant MIN_WEIGHT_BPS = 500;

@@ -69,7 +69,7 @@ contract HedgeVault is ERC20Votes, ReentrancyGuard {
     error WrongPhase();
     error Invalid();
 
-    constructor() ERC20("","") EIP712("Sherhood Share","1") {factory=address(1);}
+    constructor() ERC20("","") EIP712("Hedgerow Share","1") {factory=address(1);}
 
     function initialize(Config calldata c,address usdt_,address router_) external {
         if(factory!=address(0))revert Unauthorized();

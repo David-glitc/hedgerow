@@ -1,10 +1,10 @@
 {
   "localOnly": true,
   "chainId": 677,
-  "checkedAt": "2026-10-18T20:24:44.255Z",
-  "sherhood": {
-    "vault": "0xF4b670213f3925D13C814CF1ca1222B77F0829e8",
-    "shares": "78791452",
+  "checkedAt": "2026-10-18T22:51:29.635Z",
+  "hedgerow": {
+    "vault": "0x94B8d2f320b4E96Fb3FA5c040E8F272B18fC31A9",
+    "shares": "78791527",
     "usdtFromRedeem": "38887537",
     "flow": "create → raise → finalize (WBOT, CA via WBOT, FLOW, USDT) → claim → late join → DAO vote → rebalance → redeem in kind → redeem to USDT"
   }

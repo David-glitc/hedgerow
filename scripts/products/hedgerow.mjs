@@ -12,11 +12,11 @@ const ZERO='0x0000000000000000000000000000000000000000';
 export const component=(t,weightBps)=>({token:t.address,weightBps,mid:t.mid||ZERO,fee1:t.fee1||0,fee2:t.fee2||0});
 export const path=(usdt,c)=>c.mid===ZERO?encodePacked(['address','uint24','address'],[usdt,c.fee1,c.token]):encodePacked(['address','uint24','address','uint24','address'],[usdt,c.fee1,c.mid,c.fee2,c.token]);
 export default {
- slug:'sherhood',name:'Sherhood',repo:'sherhood-botchain',contract:'HedgeFactory',color:'#ccff00',eyebrow:'HEDGE DAO',symbol:'S',
+ slug:'hedgerow',name:'Hedgerow',repo:'hedgerow',contract:'HedgeFactory',color:'#ccff00',eyebrow:'HEDGE DAO',symbol:'H',
  line:'Pick a basket. Fund it together.',
  description:'Creators design a token basket, the community funds it in USDT, and holders steer it onchain. A hedge DAO on BOT Chain.',
  abis:['HedgeFactory','HedgeVault'],
- contracts:['src/hedge/HedgeFactory.sol','src/hedge/HedgeVault.sol','src/interfaces/IBotV3Router.sol'],tests:['test/Hedge.t.sol'],
+ contracts:['src/hedge/HedgeFactory.sol','src/hedge/HedgeVault.sol','src/interfaces/IBotV3Router.sol'],tests:['test/Hedgerow.t.sol'],
  landing:{
   steps:[['Design a basket','Pick up to five BDEX-traded tokens and their weights, a USDT goal, a raise window, fees and how the basket is governed.'],['Raise, then trade','Backers deposit USDT. When the goal is met the creator buys the whole basket in one go; a missed goal refunds everyone.'],['Hold, steer, exit','Shares track your slice of every token. Late joiners pay a higher fee, holders vote on changes, and anyone redeems after the lockup.']],
   features:[['Three governance modes','Fixed baskets never change, managed baskets rebalance behind a 24-hour timelock, DAO baskets change only by holder vote.'],['Manipulation-resistant shares','Shares are priced from the vault\'s own holdings, never from DEX prices, so pumping a pool cannot mint extra shares.'],['Refunds built in','Missed goals and unfinalized raises return every USDT. Raise fees are only charged when the basket launches.'],['Exit your way','Redeem in kind for your slice of each token, or sell it back to USDT with your own minimum output.']],

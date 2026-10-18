@@ -1,5 +1,5 @@
 {
-  "name": "sherhood-botchain",
+  "name": "hedgerow",
   "private": true,
   "type": "module",
   "scripts": {
@@ -23,6 +23,6 @@
   },
   "description": "Creators design a token basket, the community funds it in USDT, and holders steer it onchain. A hedge DAO on BOT Chain.",
   "license": "MIT",
-  "repository": "https://github.com/David-glitc/sherhood-botchain",
-  "homepage": "https://sherhood-botchain.davidopuene8.workers.dev"
+  "repository": "https://github.com/David-glitc/hedgerow",
+  "homepage": "https://hedgerow-botchain.davidopuene8.workers.dev"
 }
