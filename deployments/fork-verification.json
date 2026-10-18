@@ -1,0 +1,11 @@
+{
+  "localOnly": true,
+  "chainId": 677,
+  "checkedAt": "2026-10-18T13:13:53.156Z",
+  "sherhood": {
+    "pool": "0xE3f4BAD345E1CFe523f0327c5b683AEAf4567A8F",
+    "card": "1",
+    "claimedWBOT": "399299124984348877",
+    "flow": "create → USDT deposit → real BDEX swap → reveal → WBOT claim"
+  }
+}
