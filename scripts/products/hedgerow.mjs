@@ -12,7 +12,7 @@ const ZERO='0x0000000000000000000000000000000000000000';
 export const component=(t,weightBps)=>({token:t.address,weightBps,mid:t.mid||ZERO,fee1:t.fee1||0,fee2:t.fee2||0});
 export const path=(usdt,c)=>c.mid===ZERO?encodePacked(['address','uint24','address'],[usdt,c.fee1,c.token]):encodePacked(['address','uint24','address','uint24','address'],[usdt,c.fee1,c.mid,c.fee2,c.token]);
 export default {
- slug:'hedgerow',name:'Hedgerow',repo:'hedgerow',contract:'HedgeFactory',color:'#ccff00',eyebrow:'HEDGE DAO',symbol:'H',
+ slug:'hedgerow',vercel:'hedgerowbot',assets:['USDT','WBOT','CA','FLOW','BDEX','QUOTER'],name:'Hedgerow',repo:'hedgerow',contract:'HedgeFactory',color:'#ccff00',eyebrow:'HEDGE DAO',symbol:'H',
  line:'Pick a basket. Fund it together.',
  description:'Creators design a token basket, the community funds it in USDT, and holders steer it onchain. A hedge DAO on BOT Chain.',
  abis:['HedgeFactory','HedgeVault'],

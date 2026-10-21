@@ -1,5 +1,5 @@
 import {parseAbi,encodePacked} from 'viem';
-import {$,config,state,client,esc,fmt,link,short,button,field,form,details,amount,read,tx,approve,mine,wallet,start} from '../core.js';
+import {$,config,state,client,esc,fmt,link,short,button,field,form,details,amount,read,tx,approve,mine,wallet,asset,start} from '../core.js';
 const ZERO='0x0000000000000000000000000000000000000000',USDT=config.infrastructure.USDT;
 const quoterAbi=parseAbi(['function quoteExactInput(bytes path,uint256 amountIn) returns(uint256 amountOut,uint160[],uint32[],uint256)']);
 const symAbi=parseAbi(['function symbol() view returns(string)','function decimals() view returns(uint8)']);
@@ -51,10 +51,10 @@ async function card(id){
  const metas=await Promise.all(comps.map(c=>tokenMeta(c.token)));const own=mine(creator),now=chainNow,f=`v${id}`;
  const shownPhase=refundable?2:phase;
  let html=`<article class="item"><div class="section-head"><h3>${esc(name)} <span class="tiny">${esc(symbol)}</span></h3><span class="badge">${PHASES[shownPhase]} · ${MODES[mode]}</span></div>`;
- html+=`<div class="basket">${comps.map((c,n)=>`<span style="flex:${c.weightBps}">${esc(metas[n].symbol)} ${pct(c.weightBps)}</span>`).join('')}</div>`;
- html+=phase===0?`<div class="amount">${trim(fmt(raised,6))} / ${trim(fmt(goal,6))} USDT</div><p class="tiny">Raise ends ${new Date(Number(raiseEnd)*1000).toLocaleString()} · raise fee ${pct(raiseFee)} · late fee ${pct(lateFee)} · by ${link(creator)} · ${link(addr,'vault')}</p>`
+ html+=`<div class="basket">${comps.map((c,n)=>`<span style="flex:${c.weightBps}">${asset(metas[n].symbol,c.token)} ${pct(c.weightBps)}</span>`).join('')}</div>`;
+ html+=phase===0?`<div class="amount">${trim(fmt(raised,6))} / ${trim(fmt(goal,6))} ${asset('USDT')}</div><p class="tiny">Raise ends ${new Date(Number(raiseEnd)*1000).toLocaleString()} · raise fee ${pct(raiseFee)} · late fee ${pct(lateFee)} · by ${link(creator)} · ${link(addr,'vault')}</p>`
   :`<p class="tiny">${trim(fmt(supply,6))} shares · late-entry fee ${pct(lateFee)} · ${Number(lockupEnd)>now?`lockup until ${new Date(Number(lockupEnd)*1000).toLocaleString()}`:'redeemable'} · by ${link(creator)} · ${link(addr,'vault')}</p>`;
- if(phase===1){const hm=await Promise.all(holdings[0].map(tokenMeta));html+='<div class="holdings">'+holdings[0].map((t,n)=>`<div class="row"><span>${esc(hm[n].symbol)}</span><strong>${trim(fmt(holdings[1][n],hm[n].decimals))}</strong></div>`).join('')+'</div>';}
+ if(phase===1){const hm=await Promise.all(holdings[0].map(tokenMeta));html+='<div class="holdings">'+holdings[0].map((t,n)=>`<div class="row"><span>${asset(hm[n].symbol,t)}</span><strong>${trim(fmt(holdings[1][n],hm[n].decimals))}</strong></div>`).join('')+'</div>';}
  const slipField=k=>field(`${f}-${k}-slip`,'Max slippage (%)','2','text','inputmode="decimal"');
  if(state.account){
   const [dep,claim,shares,votes]=await Promise.all([vread(addr,'deposits',[state.account]),vread(addr,'claimable',[state.account]),vread(addr,'balanceOf',[state.account]),vread(addr,'getVotes',[state.account])]);
@@ -77,7 +77,7 @@ async function card(id){
  if(count>0n){html+='<h3>Proposals</h3>';
   for(let p=Number(count)-1;p>=Math.max(0,Number(count)-5);p--){const [[pr,next],ok,voted]=await Promise.all([vread(addr,'proposal',[BigInt(p)]),vread(addr,'passed',[BigInt(p)]),state.account?vread(addr,'hasVoted',[BigInt(p),state.account]):false]);
    const nm=await Promise.all(next.map(c=>tokenMeta(c.token))),open=now<Number(pr.end);
-   html+=`<div class="item"><div class="row"><span>#${p} · ${next.map((c,n)=>`${esc(nm[n].symbol)} ${pct(c.weightBps)}`).join(' · ')}</span><strong>${pr.executed?'Executed':open?(mode===2?'Voting':'Timelocked'):ok?'Ready':'Closed'}</strong></div>`;
+   html+=`<div class="item"><div class="row"><span>#${p} · ${next.map((c,n)=>`${asset(nm[n].symbol,c.token)} ${pct(c.weightBps)}`).join(' · ')}</span><strong>${pr.executed?'Executed':open?(mode===2?'Voting':'Timelocked'):ok?'Ready':'Closed'}</strong></div>`;
    if(mode===2)html+=`<p class="tiny">For ${trim(fmt(pr.forVotes,6))} · Against ${trim(fmt(pr.againstVotes,6))} · Quorum ${trim(fmt(pr.quorumBase*2000n/10000n,6))} · ${open?`ends ${new Date(Number(pr.end)*1000).toLocaleString()}`:'ended'}</p>`;
    const pa=[];if(mode===2&&open&&state.account&&!voted)pa.push(button('Vote for',()=>vaultTx(addr,'vote',[BigInt(p),true]),true),button('Vote against',()=>vaultTx(addr,'vote',[BigInt(p),false])));
    if(ok&&own)html+=details('Execute this change',form(`${f}-ex${p}`,slipField(`ex${p}`),'Rebalance now',async x=>{const slip=slippage(x[`${f}-ex${p}-slip`]);let cash=holdings[0].length>comps.length?holdings[1][comps.length]:0n;
