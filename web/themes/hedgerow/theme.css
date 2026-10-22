@@ -1,29 +1,29 @@
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap');
-/* Hedgerow: a fund factsheet on paper. Light, editorial, ruled; forest green carries the brand. */
-:root{--scheme:light;--bg:#F3EEE3;--surface:#FBF8F1;--surface-2:#EAE3D3;--input-bg:#FFFDF8;--tile:#EAE3D3;
- --ink:#1A2A1E;--ink-2:#4A5649;--line:#D8CFBC;--line-strong:#7E7764;
- --accent:#2E5B39;--accent-hover:#24492D;--accent-ink:#FBF8F1;--accent-text:#2E5B39;--link:#2E5B39;--focus:#A8551A;
- --danger:#A3361F;--danger-bg:#F6E3DC;--danger-text:#8E2B17;--scrim:rgba(26,42,30,.45);
- --radius-sm:2px;--radius-md:4px;--radius-lg:6px;--radius-btn:3px;--radius-pill:999px;--border-w:1px;
- --shadow-1:none;--shadow-2:0 18px 40px rgba(26,42,30,.18);--shadow-btn:none;
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;1,9..144,500&family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap');
+/* Hedgerow: a DAO treasury after dark. Deep forest night, emerald light, champagne gold, editorial serif. */
+:root{--scheme:dark;--bg:#09110D;--surface:#101B15;--surface-2:#17251D;--input-bg:#070E0A;--tile:#17251D;
+ --ink:#EEF0E6;--ink-2:#A6B3A7;--line:#22332A;--line-strong:#5F7567;
+ --accent:#7FD69A;--accent-hover:#9DE3B3;--accent-ink:#05130A;--accent-text:#8EDCA7;--link:#A9E5BB;--focus:#E8C66B;
+ --danger:#F07A64;--danger-bg:#2A1410;--danger-text:#F59A86;--scrim:rgba(3,8,5,.72);
+ --radius-sm:2px;--radius-md:4px;--radius-lg:8px;--radius-btn:3px;--radius-pill:999px;--border-w:1px;
+ --shadow-1:none;--shadow-2:0 24px 60px rgba(0,0,0,.55);--shadow-btn:none;
  --font-display:'Fraunces',Georgia,serif;--font-body:'Public Sans',system-ui,sans-serif;--font-label:'Public Sans',system-ui,sans-serif;--font-mono:'IBM Plex Mono',ui-monospace,monospace;
- --display-weight:600;--display-tracking:-0.02em;--display-case:none;--label-tracking:.16em}
-/* Factsheet rhythm: double rule under the header, ruled sections, numbers in serif. */
-header{border-bottom:3px double var(--line-strong)}
-h1{font-variation-settings:"opsz" 144;max-width:14ch}
-.hero{padding-top:64px}
-.steps{gap:0;border-top:2px solid var(--ink)}
-.steps li{background:none;border:0;border-bottom:1px solid var(--line);border-radius:0;padding:22px 24px 22px 0}
+ --display-weight:500;--display-tracking:-0.025em;--display-case:none;--label-tracking:.18em;
+ --hero-bg:radial-gradient(55% 60% at 78% 28%,rgba(127,214,154,.28),transparent 70%),radial-gradient(40% 45% at 12% 85%,rgba(232,198,107,.16),transparent 70%),radial-gradient(30% 30% at 45% 10%,rgba(127,214,154,.10),transparent 70%),var(--bg);
+ --hero-pattern:radial-gradient(rgba(238,240,230,.22) 1px,transparent 1.4px);--hero-pattern-size:22px 22px;--hero-pattern-opacity:.55;
+ --chip-bg:rgba(16,27,21,.7);--live:#7FD69A;--live-ring:rgba(127,214,154,.25);--art-glow:radial-gradient(circle,rgba(127,214,154,.55),rgba(232,198,107,.25) 55%,transparent 72%);--ticker-bg:#0C1611}
+/* Champagne italics, ruled factsheet steps, serif numerals. */
+header{border-bottom-color:rgba(95,117,103,.45)}
+h1{font-variation-settings:"opsz" 144}
+h1 em,.hero h1{font-style:normal}
+.eyebrow{color:var(--focus)}
+.steps{gap:0;border-top:1px solid var(--line-strong)}
+.steps li{background:none;border:0;border-bottom:1px solid var(--line);border-radius:0;padding:24px 24px 24px 0}
 .steps li+li{border-left:1px solid var(--line);padding-left:24px}
-.steps li:before{font-family:var(--font-display);font-size:2.4rem;font-weight:500;color:var(--accent-text);line-height:1}
+.steps li:before{font-family:var(--font-display);font-size:2.6rem;font-weight:500;font-style:italic;color:var(--focus);line-height:1}
 .features div{border-left:0;border-top:1px solid var(--line-strong);padding:16px 0 0}
-.facts{border-top:2px solid var(--ink)}
-.launch{border-width:0 0 0 0;border-top:2px solid var(--accent);border-bottom:1px solid var(--line);border-radius:0;background:none;padding:16px 0}
+.facts{border-top:1px solid var(--line-strong)}
+.launch{border:0;border-top:1px solid var(--accent);border-bottom:1px solid var(--line);border-radius:0;background:none;padding:16px 0}
 .launch.pending{border-top-color:var(--line-strong)}
-.cta-band{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
-.cta-band h2,.cta-band p{color:var(--accent-ink)}
-.cta-band a.button.primary{background:var(--surface);color:var(--accent);border-color:var(--surface)}
-.cta-band a.button.primary:hover{background:var(--bg);border-color:var(--bg)}
-.panel{border-top:3px solid var(--ink)}
-.basket span{border-top-color:var(--accent);background:var(--surface-2)}
+.cta-band{background:radial-gradient(70% 120% at 85% 0%,rgba(127,214,154,.22),transparent 60%),var(--surface);border-color:var(--line-strong)}
+.panel{border-top:2px solid var(--accent)}
 @media(max-width:860px){.steps li+li{border-left:0;padding-left:0}}
