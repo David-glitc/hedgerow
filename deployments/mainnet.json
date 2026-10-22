@@ -1,0 +1,42 @@
+{
+  "chainId": 677,
+  "network": "mainnet",
+  "deployer": "0x766d0d810eCF822e02df47CDb5A389777f291895",
+  "local": false,
+  "contracts": {
+    "HedgeFactory": "0x27a6ac1494a52a7e4c3e55d5b30974b398b7ea00"
+  },
+  "actions": {
+    "deploy:HedgeFactory": {
+      "hash": "0x02df86f22d5a0b56c8fe3ab210d9951fef9a136b667ad919ab6c201a0fbab7e4",
+      "receipt": {
+        "transactionHash": "0x02df86f22d5a0b56c8fe3ab210d9951fef9a136b667ad919ab6c201a0fbab7e4",
+        "contractAddress": "0x27a6ac1494a52a7e4c3e55d5b30974b398b7ea00",
+        "blockNumber": "27571955",
+        "gasUsed": "5593424",
+        "gasPrice": "20000000000"
+      }
+    }
+  },
+  "gasSpentWei": "284775900000000000",
+  "ready": true,
+  "infrastructure": {
+    "USDT": "0xaBabc7Ddc03e501d190C676BF3d92ef0e6e87a3C",
+    "WBOT": "0xD5452816194a3784dBa983426cCe7c122F4abd30",
+    "router": "0x07032d47A1b9f8460cBeE9dC17c1d3E438693929",
+    "quoter": "0x034A705b36067cff99ABf5C662Be881cBd8d0176",
+    "fee": 3000
+  },
+  "launched": {
+    "hedgerow": "2026-10-22T10:03:14.119Z"
+  },
+  "sourceHashes": {
+    "HedgeFactory": "0xdbe4d1044268d12ee5f1900aa149649f822f1946ffd87be5de9b40ee29f6fe54"
+  },
+  "records": {
+    "hedgerowReferenceBasket": {
+      "vault": "0x94B8d2f320b4E96Fb3FA5c040E8F272B18fC31A9",
+      "tx": "0x2c24e6e1a4f01297f0ea0106be58b14c75698f0625fd45597887c83316707e21"
+    }
+  }
+}
