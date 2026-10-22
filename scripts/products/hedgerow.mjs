@@ -1,18 +1,27 @@
 import assert from 'node:assert/strict';
 import {parseAbi,encodePacked,toHex,parseEther} from 'viem';
 const quoter=parseAbi(['function quoteExactInput(bytes path,uint256 amountIn) returns(uint256 amountOut,uint160[],uint32[],uint256)']);
-// Tokens with live BDEX routes from USDT, as of October 2026. `mid` routes through WBOT.
-export const tokens=[
- {symbol:'USDT',name:'Tether USD (cash)',address:'0xaBabc7Ddc03e501d190C676BF3d92ef0e6e87a3C',decimals:6,cash:true},
- {symbol:'WBOT',name:'Wrapped BOT',address:'0xD5452816194a3784dBa983426cCe7c122F4abd30',decimals:18,fee1:3000},
- {symbol:'CA',name:'CaryPact',address:'0x546307af427902A75771434Df831d88219784E19',decimals:18,mid:'0xD5452816194a3784dBa983426cCe7c122F4abd30',fee1:3000,fee2:10000},
- {symbol:'FLOW',name:'FlowBridge',address:'0xcaaB50F36252a57529AFeF651fa6B9f9281917fF',decimals:18,fee1:10000},
-];
+// Tokens with live BDEX routes from USDT, per network (October 2026). `mid` routes through WBOT.
+const WBOT='0xD5452816194a3784dBa983426cCe7c122F4abd30';
+export const tokenLists={
+ mainnet:[
+  {symbol:'USDT',name:'Tether USD (cash)',address:'0xaBabc7Ddc03e501d190C676BF3d92ef0e6e87a3C',decimals:6,cash:true},
+  {symbol:'WBOT',name:'Wrapped BOT',address:WBOT,decimals:18,fee1:3000},
+  {symbol:'CA',name:'CaryPact',address:'0x546307af427902A75771434Df831d88219784E19',decimals:18,mid:WBOT,fee1:3000,fee2:10000},
+  {symbol:'FLOW',name:'FlowBridge',address:'0xcaaB50F36252a57529AFeF651fa6B9f9281917fF',decimals:18,fee1:10000},
+ ],
+ testnet:[
+  {symbol:'USDT',name:'Tether USD (cash)',address:'0x75edC9335175Fc0552D51D48439F229c10420fe3',decimals:6,cash:true},
+  {symbol:'WBOT',name:'Wrapped BOT',address:WBOT,decimals:18,fee1:3000},
+  {symbol:'TESTBOT1',name:'Test BOT 1 (testnet)',address:'0x62eCC4FfdE61f454EfFefA95f42296276F922888',decimals:18,mid:WBOT,fee1:3000,fee2:3000},
+  {symbol:'TESTBOT3',name:'Test BOT 3 (testnet)',address:'0x037Fe8163A86235B9889f848F740fBd2224A4888',decimals:18,fee1:3000},
+ ],
+};
 const ZERO='0x0000000000000000000000000000000000000000';
 export const component=(t,weightBps)=>({token:t.address,weightBps,mid:t.mid||ZERO,fee1:t.fee1||0,fee2:t.fee2||0});
 export const path=(usdt,c)=>c.mid===ZERO?encodePacked(['address','uint24','address'],[usdt,c.fee1,c.token]):encodePacked(['address','uint24','address','uint24','address'],[usdt,c.fee1,c.mid,c.fee2,c.token]);
 export default {
- slug:'hedgerow',vercel:'hedgerowbot',assets:['USDT','WBOT','CA','FLOW','BDEX','QUOTER'],name:'Hedgerow',repo:'hedgerow',contract:'HedgeFactory',color:'#ccff00',eyebrow:'HEDGE DAO',symbol:'H',
+ slug:'hedgerow',vercel:'hedgerowbot',assets:['TOKENS','BDEX','QUOTER'],name:'Hedgerow',repo:'hedgerow',contract:'HedgeFactory',color:'#ccff00',eyebrow:'HEDGE DAO',symbol:'H',
  line:'Pick a basket. Fund it together.',
  description:'Creators design a token basket, the community funds it in USDT, and holders steer it onchain. A hedge DAO on BOT Chain.',
  abis:['HedgeFactory','HedgeVault'],
@@ -22,9 +31,10 @@ export default {
   features:[['Three governance modes','Fixed baskets never change, managed baskets rebalance behind a 24-hour timelock, DAO baskets change only by holder vote.'],['Manipulation-resistant shares','Shares are priced from the vault\'s own holdings, never from DEX prices, so pumping a pool cannot mint extra shares.'],['Refunds built in','Missed goals and unfinalized raises return every USDT. Raise fees are only charged when the basket launches.'],['Exit your way','Redeem in kind for your slice of each token, or sell it back to USDT with your own minimum output.']],
   faq:[['Which tokens can a basket hold?','Any token with a BDEX route from USDT, directly or through WBOT. Today that means USDT, WBOT, CaryPact (CA) and FlowBridge (FLOW). New BDEX listings become available automatically.'],['What do creators earn?','A raise fee of up to 2% when the basket launches, and a late-entry fee of up to 5% that is never lower than the raise fee.'],['How does DAO voting work?','Holders vote with their shares as of the proposal. A change passes with a majority and at least 20% of all shares voting for it, then the creator executes it within seven days.'],['What are the risks?','Basket tokens can lose value, thin pools move on large trades, and the creator sets minimum outputs when buying. The contracts are unaudited; start small.']],
  },
- tokens,
+ tokens:tokenLists,
  async deploy({deploy,i}){await deploy('HedgeFactory',[i.USDT,i.router]);},
- async fork({c,abi,i,tx,write,read,contract,owner,fundUSDT,artifact}){
+ async fork({c,abi,i,tx,write,read,contract,owner,fundUSDT,artifact,net}){
+  const tokens=tokenLists[net];
   const vaultAbi=artifact('HedgeVault').abi;const v=(fn,args=[],value=0n,address)=>tx(vaultAbi,address,fn,args,value);
   const quote=async(cmp,n)=>cmp.token.toLowerCase()===i.USDT.toLowerCase()?0n:(await c.simulateContract({address:i.quoter,abi:quoter,functionName:'quoteExactInput',args:[path(i.USDT,cmp),n]})).result[0]*97n/100n;
   const basket=[component(tokens[1],5000),component(tokens[2],1500),component(tokens[3],1000),component(tokens[0],2500)];

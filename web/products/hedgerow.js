@@ -24,6 +24,8 @@ async function syncClock(){chainNow=Number((await client.getBlock()).timestamp);
 const deadline=()=>BigInt(chainNow+900);
 const vaultTx=(addr,fn,args=[])=>tx('HedgeVault',fn,args,0n,addr);
 const vread=(addr,fn,args=[])=>read('HedgeVault',fn,args,addr);
+// 50/15/10 across the first three non-cash tokens and 25% cash, whatever this network lists.
+function defaultWeights(){const w={},split=[50,15,10];let n=0;for(const t of config.tokens)w[t.symbol]=t.cash?25:(split[n++]??0);return w;}
 function weightFields(prefix,defaults={}){return '<fieldset class="weights"><legend>Basket weights (%) — must total 100</legend>'+config.tokens.map(t=>field(`${prefix}-w-${t.symbol}`,`${t.symbol} · ${t.name}`,String(defaults[t.symbol]??0),'text','inputmode="decimal"')).join('')+`<p class="tiny" id="${prefix}-total" aria-live="polite"></p></fieldset>`;}
 function basketFrom(f,prefix){const comps=[];let total=0;
  for(const t of config.tokens){const raw=f[`${prefix}-w-${t.symbol}`]||'0';if(!/^\d+(\.\d{1,2})?$/.test(raw))throw Error(`Use a number for the ${t.symbol} weight.`);const bps=Math.round(Number(raw)*100);if(!bps)continue;if(bps<500)throw Error(`${t.symbol}: each token needs at least 5%.`);total+=bps;comps.push({token:t.address,weightBps:bps,mid:t.mid||ZERO,fee1:t.fee1||0,fee2:t.fee2||0});}
@@ -32,7 +34,7 @@ function watchTotal(formId,prefix){const f=document.querySelector(`[data-form="$
 
 function controls(){
  $('list-title').textContent='Baskets';
- $('controls').innerHTML='<h2>Create a basket</h2>'+form('create',field('name','Basket name','BOT Chain Core','text','maxlength="48"')+field('symbol','Share symbol','CORE','text','maxlength="12"')+weightFields('c',{WBOT:50,CA:15,FLOW:10,USDT:25})
+ $('controls').innerHTML='<h2>Create a basket</h2>'+form('create',field('name','Basket name','BOT Chain Core','text','maxlength="48"')+field('symbol','Share symbol','CORE','text','maxlength="12"')+weightFields('c',defaultWeights())
   +`<label for="mode">Governance</label><select id="mode" name="mode"><option value="2">DAO — holders vote on changes</option><option value="1">Managed — you rebalance after a 24h timelock</option><option value="0">Fixed — the basket never changes</option></select>`
   +field('goal','Raise goal (USDT)','100','text','inputmode="decimal"')+field('days','Raise window (days, 1–30)','7','number','min="1" max="30"')+field('lockup','Lockup after launch (days, 0–90)','7','number','min="0" max="90"')
   +field('raise-fee','Raise fee (%, max 2)','0.5','text','inputmode="decimal"')+field('late-fee','Late-entry fee (%, max 5, ≥ raise fee)','2','text','inputmode="decimal"'),'Create basket',async f=>{
