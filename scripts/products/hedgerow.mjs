@@ -23,6 +23,7 @@ export const path=(usdt,c)=>c.mid===ZERO?encodePacked(['address','uint24','addre
 export default {
  slug:'hedgerow',vercel:'hedgerowbot',assets:['TOKENS','BDEX','QUOTER'],name:'Hedgerow',repo:'hedgerow',contract:'HedgeFactory',color:'#ccff00',eyebrow:'HEDGE DAO',symbol:'H',
  line:'Pick a basket. Fund it together.',
+ app:{title:'Basket factsheets',line:'Back a raise, join a live basket, or design your own.',layout:'sheet'},
  description:'Creators design a token basket, the community funds it in USDT, and holders steer it onchain. A hedge DAO on BOT Chain.',
  abis:['HedgeFactory','HedgeVault'],
  contracts:['src/hedge/HedgeFactory.sol','src/hedge/HedgeVault.sol','src/interfaces/IBotV3Router.sol'],tests:['test/Hedgerow.t.sol'],
