@@ -6,6 +6,7 @@
 
 - Website and app: https://hedgerowbot.vercel.app (app at [`/app/`](https://hedgerowbot.vercel.app/app/))
 - Network: BOT Chain mainnet, chain ID 677 · [BOT Chain](https://www.botchain.ai/) · [BOTScan](https://scan.botchain.ai/)
+- X: [@Hedgerow_fi](https://x.com/Hedgerow_fi)
 
 ![Hedgerow landing page](docs/hedgerow-landing-1280.png)
 
