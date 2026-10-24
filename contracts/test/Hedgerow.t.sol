@@ -94,8 +94,8 @@ contract HedgeTest is Test {
         HedgeVault v=_launch(HedgeVault.Mode.Fixed,7 days);
         vm.prank(alice);vm.expectRevert(HedgeVault.WrongPhase.selector);v.redeem(1e6);
         vm.warp(block.timestamp+7 days);
-        uint256 before=usdt.balanceOf(alice);vm.prank(alice);vm.expectRevert(HedgeVault.Invalid.selector);v.redeemToUSDT(59.4e6,_mins(),1e30,block.timestamp);
-        vm.prank(alice);uint256 out=v.redeemToUSDT(59.4e6,_mins(),59e6,block.timestamp);
+        uint256 before=usdt.balanceOf(alice);vm.prank(alice);vm.expectRevert(HedgeVault.Invalid.selector);v.redeemToCash(59.4e6,_mins(),1e30,block.timestamp);
+        vm.prank(alice);uint256 out=v.redeemToCash(59.4e6,_mins(),59e6,block.timestamp);
         assertApproxEqAbs(out,59.4e6,10);assertEq(usdt.balanceOf(alice)-before,out);assertEq(v.balanceOf(alice),0);
     }
     function test_managedRebalanceIsCreatorOnlyAfterLockupAndDelay() public {
@@ -155,9 +155,31 @@ contract HedgeTest is Test {
         c[0].weightBps=4000;vm.expectRevert(bytes("weights must total 100%"));factory.createVault(cfg);c[0].weightBps=5000;
         c[1].fee2=500;vm.expectRevert(bytes("no route"));factory.createVault(cfg);c[1].fee2=10000;
         c[2].token=address(wbot);vm.expectRevert(bytes("duplicate token"));factory.createVault(cfg);c[2].token=address(usdt);
-        c[1].mid=address(0);vm.expectRevert(bytes("no USDT pool"));factory.createVault(cfg);c[1].mid=address(wbot);
+        c[1].mid=address(0);vm.expectRevert(bytes("no cash pool"));factory.createVault(cfg);c[1].mid=address(wbot);
         cfg.lateFeeBps=50;vm.expectRevert(bytes("invalid terms"));factory.createVault(cfg);cfg.lateFeeBps=600;vm.expectRevert(bytes("invalid terms"));factory.createVault(cfg);cfg.lateFeeBps=300;
         cfg.raiseEnd=uint64(block.timestamp+31 days);vm.expectRevert(bytes("invalid raise"));factory.createVault(cfg);cfg.raiseEnd=uint64(block.timestamp+1 days);
         factory.createVault(cfg);assertEq(factory.vaultCount(),1);vm.stopPrank();
+    }
+
+    /// @dev Mainnet configuration: the cash token is 18-decimal WBOT. Shares follow its decimals and every exit works.
+    function test_wbotCashBasket() public {
+        HedgeFactory wf=new HedgeFactory(address(wbot),address(dex));
+        dex.setRate(address(wbot),address(ca),2.5e18);dex.setRate(address(ca),address(wbot),0.4e18);
+        HedgeVault.Component[] memory c=new HedgeVault.Component[](3);
+        c[0]=HedgeVault.Component(address(wbot),5000,address(0),0,0);
+        c[1]=HedgeVault.Component(address(usdt),2500,address(0),3000,0);
+        c[2]=HedgeVault.Component(address(ca),2500,address(0),10000,0);
+        vm.prank(creator);HedgeVault v=HedgeVault(wf.createVault(HedgeVault.Config(creator,"BOT Core","CORE",HedgeVault.Mode.Fixed,6e18,uint64(block.timestamp+1 days),0,0,0,c)));
+        assertEq(v.decimals(),18);
+        address[3] memory us=[alice,bob,carol];
+        for(uint256 i;i<3;i++){wbot.mint(us[i],10e18);vm.startPrank(us[i]);wbot.approve(address(v),2e18);v.deposit(2e18);vm.stopPrank();}
+        uint256[] memory m=new uint256[](3);m[1]=1;m[2]=1;
+        vm.prank(creator);v.finalize(m,block.timestamp);
+        assertEq(wbot.balanceOf(address(v)),3e18);assertEq(usdt.balanceOf(address(v)),1.5e18*12.5e6/1e18);assertEq(ca.balanceOf(address(v)),1.5e18*2.5);
+        for(uint256 i;i<3;i++){vm.prank(us[i]);v.claimShares();assertEq(v.balanceOf(us[i]),2e18);}
+        uint256 w0=wbot.balanceOf(alice);vm.prank(alice);v.redeem(1e18);
+        assertEq(wbot.balanceOf(alice)-w0,0.5e18);assertEq(ca.balanceOf(alice),0.625e18);
+        uint256 w1=wbot.balanceOf(bob);vm.prank(bob);uint256 out=v.redeemToCash(2e18,m,1.99e18,block.timestamp);
+        assertApproxEqAbs(out,2e18,1e6);assertEq(wbot.balanceOf(bob)-w1,out);
     }
 }

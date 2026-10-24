@@ -1,6 +1,6 @@
 # Hedgerow
 
-**Pick a basket. Fund it together.** Creators design a token basket, the community funds it in USDT, and holders steer it onchain. A hedge DAO on BOT Chain.
+**Pick a basket. Fund it together.** Creators design a token basket, the community funds it in BOT, and holders steer it onchain. A hedge DAO on BOT Chain.
 
 **Officially launched on BOT Chain Mainnet** on 2026-10-22.
 
@@ -11,22 +11,22 @@
 
 ## How it works
 
-1. **Design a basket.** Pick up to five BDEX-traded tokens and their weights, a USDT goal, a raise window, fees and how the basket is governed.
-2. **Raise, then trade.** Backers deposit USDT. When the goal is met the creator buys the whole basket in one go; a missed goal refunds everyone.
+1. **Design a basket.** Pick up to five BDEX-traded tokens and their weights, a BOT goal, a raise window, fees and how the basket is governed.
+2. **Raise, then trade.** Backers deposit BOT. When the goal is met the creator buys the whole basket in one go; a missed goal refunds everyone.
 3. **Hold, steer, exit.** Shares track your slice of every token. Late joiners pay a higher fee, holders vote on changes, and anyone redeems after the lockup.
 
 ## Features
 
 - **Three governance modes.** Fixed baskets never change, managed baskets rebalance behind a 24-hour timelock, DAO baskets change only by holder vote.
 - **Manipulation-resistant shares.** Shares are priced from the vault's own holdings, never from DEX prices, so pumping a pool cannot mint extra shares.
-- **Refunds built in.** Missed goals and unfinalized raises return every USDT. Raise fees are only charged when the basket launches.
-- **Exit your way.** Redeem in kind for your slice of each token, or sell it back to USDT with your own minimum output.
+- **Refunds built in.** Missed goals and unfinalized raises return every BOT. Raise fees are only charged when the basket launches.
+- **Exit your way.** Redeem in kind for your slice of each token, or sell it back to WBOT with your own minimum output.
 
 ## Contracts
 
 | Contract | BOT Chain mainnet |
 |---|---|
-| `HedgeFactory` | [`0x27a6ac1494a52a7e4c3e55d5b30974b398b7ea00`](https://scan.botchain.ai/address/0x27a6ac1494a52a7e4c3e55d5b30974b398b7ea00) |
+| `HedgeFactory` | [`0xb36712b7378ff1c5636177556f954aabc6ef65f7`](https://scan.botchain.ai/address/0xb36712b7378ff1c5636177556f954aabc6ef65f7) |
 
 BOT Chain infrastructure used: USDT `0xaBabc7Ddc03e501d190C676BF3d92ef0e6e87a3C`, WBOT `0xD5452816194a3784dBa983426cCe7c122F4abd30`, BDEX router `0x07032d47A1b9f8460cBeE9dC17c1d3E438693929`, BDEX QuoterV2 `0x034A705b36067cff99ABf5C662Be881cBd8d0176`.
 

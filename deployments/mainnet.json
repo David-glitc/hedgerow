@@ -4,21 +4,21 @@
   "deployer": "0x766d0d810eCF822e02df47CDb5A389777f291895",
   "local": false,
   "contracts": {
-    "HedgeFactory": "0x27a6ac1494a52a7e4c3e55d5b30974b398b7ea00"
+    "HedgeFactory": "0xb36712b7378ff1c5636177556f954aabc6ef65f7"
   },
   "actions": {
     "deploy:HedgeFactory": {
-      "hash": "0x02df86f22d5a0b56c8fe3ab210d9951fef9a136b667ad919ab6c201a0fbab7e4",
+      "hash": "0x7e7ed18c9e4d1ec96bef4269e6281d1b69612d1345448ac2af00e1a71101375c",
       "receipt": {
-        "transactionHash": "0x02df86f22d5a0b56c8fe3ab210d9951fef9a136b667ad919ab6c201a0fbab7e4",
-        "contractAddress": "0x27a6ac1494a52a7e4c3e55d5b30974b398b7ea00",
-        "blockNumber": "27571955",
-        "gasUsed": "5593424",
+        "transactionHash": "0x7e7ed18c9e4d1ec96bef4269e6281d1b69612d1345448ac2af00e1a71101375c",
+        "contractAddress": "0xb36712b7378ff1c5636177556f954aabc6ef65f7",
+        "blockNumber": "27796763",
+        "gasUsed": "5628991",
         "gasPrice": "20000000000"
       }
     }
   },
-  "gasSpentWei": "284775900000000000",
+  "gasSpentWei": "397355720000000000",
   "ready": true,
   "infrastructure": {
     "USDT": "0xaBabc7Ddc03e501d190C676BF3d92ef0e6e87a3C",
@@ -31,12 +31,53 @@
     "hedgerow": "2026-10-22T10:03:14.119Z"
   },
   "sourceHashes": {
-    "HedgeFactory": "0xdbe4d1044268d12ee5f1900aa149649f822f1946ffd87be5de9b40ee29f6fe54"
+    "HedgeFactory": "0xd37cbed20d0a1333c94e2711735a053e2456079a901b63a311eeffb3555fc459"
   },
   "records": {
     "hedgerowReferenceBasket": {
-      "vault": "0x94B8d2f320b4E96Fb3FA5c040E8F272B18fC31A9",
-      "tx": "0x2c24e6e1a4f01297f0ea0106be58b14c75698f0625fd45597887c83316707e21"
+      "vault": "0x03761346f5c0C479bd3256A4A72848Bbc4BE5729",
+      "tx": "0xb6eeda7d51421ddd17b43420480ee451a9ba70e544a9a9efd270f6af08f2392f",
+      "name": "BOT Chain Core",
+      "goalBOT": "10",
+      "raiseEnd": "2026-11-07T08:54:20.000Z",
+      "gasBOT": "0.01074572"
+    },
+    "communityTestBasket": {
+      "vault": "0xC63d4B4B17fbb1F74B50E4966A7Db17745321b38",
+      "tx": "0xc55f08e6e1ce5172d6a9d8a82718171da9f6e3f3749b8211123f3e5a9c878238",
+      "name": "Community Test Basket",
+      "goalBOT": "0.5",
+      "raiseEnd": "2026-10-31T08:54:22.000Z",
+      "gasBOT": "0.00801236"
+    }
+  },
+  "legacy": {
+    "hedgerowUSDT": {
+      "note": "Hedgerow v1, funded in USDT. Superseded 2026-10-24 by the WBOT-funded HedgeFactory; no deposits were ever made.",
+      "HedgeFactory": "0x27a6ac1494a52a7e4c3e55d5b30974b398b7ea00",
+      "deployAction": {
+        "hash": "0x02df86f22d5a0b56c8fe3ab210d9951fef9a136b667ad919ab6c201a0fbab7e4",
+        "receipt": {
+          "transactionHash": "0x02df86f22d5a0b56c8fe3ab210d9951fef9a136b667ad919ab6c201a0fbab7e4",
+          "contractAddress": "0x27a6ac1494a52a7e4c3e55d5b30974b398b7ea00",
+          "blockNumber": "27571955",
+          "gasUsed": "5593424",
+          "gasPrice": "20000000000"
+        }
+      },
+      "baskets": {
+        "botChainCore": {
+          "vault": "0x94B8d2f320b4E96Fb3FA5c040E8F272B18fC31A9",
+          "tx": "0x2c24e6e1a4f01297f0ea0106be58b14c75698f0625fd45597887c83316707e21"
+        },
+        "communityTestBasket": {
+          "vault": "0xA5E8D79c05aa3Dc4ADbC5E2149A242d69833F3a2",
+          "tx": "0xbe362f95064ebd843d7cf3507361b55ac450fbbfce0e9031a117e282708f1797",
+          "goalUSDT": 6,
+          "raiseEnd": "2026-10-27T08:29:06.000Z",
+          "note": "Team-created test basket for the three-tester guide; testers deposit and claim from their own wallets."
+        }
+      }
     }
   }
 }

@@ -4,11 +4,12 @@ import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import {EIP712} from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
 import {ERC20Votes} from "@openzeppelin/contracts/token/ERC20/extensions/ERC20Votes.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import {IBotV3PathRouter} from "../interfaces/IBotV3Router.sol";
 
-/// @notice A creator-designed token basket funded in USDT. Raise first, then trade; late entries pay a higher fee.
+/// @notice A creator-designed token basket funded in the factory's cash token (WBOT on BOT Chain). Raise first, then trade; late entries pay a higher fee.
 /// @dev Deployed as an EIP-1167 clone by HedgeFactory. Shares are priced by the vault's own holdings, never by DEX
 ///      prices: a late entry buys the basket and receives shares in proportion to the smallest relative increase in
 ///      any holding, so a manipulated pool price cannot mint extra shares. Shares are ERC20Votes for DAO-mode voting.
@@ -16,7 +17,7 @@ contract HedgeVault is ERC20Votes, ReentrancyGuard {
     using SafeERC20 for IERC20;
     enum Mode {Fixed, Managed, DAO}
     enum Phase {Raising, Active, Failed}
-    /// @dev `mid` is address(0) for a direct USDT pool, otherwise the hop token (USDT -fee1-> mid -fee2-> token).
+    /// @dev `mid` is address(0) for a direct cash pool, otherwise the hop token (cash -fee1-> mid -fee2-> token).
     struct Component {address token; uint16 weightBps; address mid; uint24 fee1; uint24 fee2;}
     struct Config {
         address creator; string name; string symbol; Mode mode;
@@ -32,7 +33,9 @@ contract HedgeVault is ERC20Votes, ReentrancyGuard {
     uint256 public constant EXECUTION_WINDOW = 7 days;
     uint256 public constant QUORUM_BPS = 2000;
 
-    IERC20 public usdt;
+    IERC20 public cash;
+    /// @dev Shares are minted 1:1 with net cash deposited, so they carry the cash token's decimals (18 for WBOT).
+    uint8 private _cashDecimals;
     IBotV3PathRouter public router;
     address public factory;
     address public creator;
@@ -60,7 +63,7 @@ contract HedgeVault is ERC20Votes, ReentrancyGuard {
     event Refunded(address indexed user,uint256 amount);
     event SharesClaimed(address indexed user,uint256 shares);
     event Joined(address indexed user,uint256 amount,uint256 fee,uint256 shares);
-    event Redeemed(address indexed user,uint256 shares,bool toUSDT,uint256 usdtOut);
+    event Redeemed(address indexed user,uint256 shares,bool toCash,uint256 cashOut);
     event Proposed(uint256 indexed id,address indexed proposer,uint64 start,uint64 end);
     event Voted(uint256 indexed id,address indexed voter,bool support,uint256 weight);
     event Rebalanced(uint256 indexed id);
@@ -71,42 +74,42 @@ contract HedgeVault is ERC20Votes, ReentrancyGuard {
 
     constructor() ERC20("","") EIP712("Hedgerow Share","1") {factory=address(1);}
 
-    function initialize(Config calldata c,address usdt_,address router_) external {
+    function initialize(Config calldata c,address cash_,address router_) external {
         if(factory!=address(0))revert Unauthorized();
         factory=msg.sender;creator=c.creator;mode=c.mode;goal=c.goal;raiseEnd=c.raiseEnd;lockup=c.lockup;
         raiseFeeBps=c.raiseFeeBps;lateFeeBps=c.lateFeeBps;_vaultName=c.name;_vaultSymbol=c.symbol;
-        usdt=IERC20(usdt_);router=IBotV3PathRouter(router_);
+        cash=IERC20(cash_);_cashDecimals=IERC20Metadata(cash_).decimals();router=IBotV3PathRouter(router_);
         for(uint256 i;i<c.components.length;i++)_components.push(c.components[i]);
     }
 
     function name() public view override returns(string memory){return _vaultName;}
     function symbol() public view override returns(string memory){return _vaultSymbol;}
-    function decimals() public pure override returns(uint8){return 6;}
+    function decimals() public view override returns(uint8){return _cashDecimals;}
     function components() external view returns(Component[] memory){return _components;}
     function proposalCount() external view returns(uint256){return _proposals.length;}
     function proposal(uint256 id) external view returns(Proposal memory p,Component[] memory comps){return (_proposals[id],_proposalComponents[id]);}
     function effectiveSupply() public view returns(uint256){return totalSupply()+unclaimed;}
 
-    /// @notice Every token a share redeems into: the components, plus idle USDT when USDT is not a component.
+    /// @notice Every token a share redeems into: the components, plus idle cash when the cash token is not a component.
     function holdings() public view returns(address[] memory tokens,uint256[] memory amounts){
-        uint256 n=_components.length;bool cash;
-        for(uint256 i;i<n;i++)if(_components[i].token==address(usdt))cash=true;
-        tokens=new address[](cash?n:n+1);amounts=new uint256[](tokens.length);
+        uint256 n=_components.length;bool hasCash;
+        for(uint256 i;i<n;i++)if(_components[i].token==address(cash))hasCash=true;
+        tokens=new address[](hasCash?n:n+1);amounts=new uint256[](tokens.length);
         for(uint256 i;i<n;i++){tokens[i]=_components[i].token;amounts[i]=IERC20(tokens[i]).balanceOf(address(this));}
-        if(!cash){tokens[n]=address(usdt);amounts[n]=usdt.balanceOf(address(this));}
+        if(!hasCash){tokens[n]=address(cash);amounts[n]=cash.balanceOf(address(this));}
     }
 
     // ---- Raise ----
     function deposit(uint256 amount) external nonReentrant {
         if(phase!=Phase.Raising||block.timestamp>=raiseEnd)revert WrongPhase();
-        uint256 got=_pull(usdt,amount);deposits[msg.sender]+=got;raised+=got;emit Deposited(msg.sender,got);
+        uint256 got=_pull(cash,amount);deposits[msg.sender]+=got;raised+=got;emit Deposited(msg.sender,got);
     }
-    /// @notice Creator buys the basket once the goal is met. `minOuts` follow component order (ignored for USDT).
+    /// @notice Creator buys the basket once the goal is met. `minOuts` follow component order (ignored for the cash token).
     function finalize(uint256[] calldata minOuts,uint256 deadline) external nonReentrant {
         if(msg.sender!=creator)revert Unauthorized();
         if(phase!=Phase.Raising||raised<goal||block.timestamp>uint256(raiseEnd)+FINALIZE_WINDOW)revert WrongPhase();
         phase=Phase.Active;lockupEnd=uint64(block.timestamp)+lockup;
-        uint256 fee=raised*raiseFeeBps/10_000;if(fee>0)usdt.safeTransfer(creator,fee);
+        uint256 fee=raised*raiseFeeBps/10_000;if(fee>0)cash.safeTransfer(creator,fee);
         unclaimed=raised-fee;_buy(raised-fee,minOuts,deadline);emit Finalized(raised,fee);
     }
     function refundable() public view returns(bool){
@@ -116,7 +119,7 @@ contract HedgeVault is ERC20Votes, ReentrancyGuard {
     function refund() external nonReentrant {
         if(!refundable())revert WrongPhase();phase=Phase.Failed;
         uint256 amount=deposits[msg.sender];if(amount==0)revert Invalid();deposits[msg.sender]=0;
-        usdt.safeTransfer(msg.sender,amount);emit Refunded(msg.sender,amount);
+        cash.safeTransfer(msg.sender,amount);emit Refunded(msg.sender,amount);
     }
     function claimable(address user) public view returns(uint256){return phase==Phase.Active?deposits[user]*(10_000-raiseFeeBps)/10_000:0;}
     function claimShares() public {
@@ -128,7 +131,7 @@ contract HedgeVault is ERC20Votes, ReentrancyGuard {
     function join(uint256 amount,uint256[] calldata minOuts,uint256 deadline) external nonReentrant returns(uint256 shares){
         if(phase!=Phase.Active)revert WrongPhase();
         (,uint256[] memory before)=holdings();uint256 supply=effectiveSupply();
-        uint256 got=_pull(usdt,amount);uint256 fee=got*lateFeeBps/10_000;if(fee>0)usdt.safeTransfer(creator,fee);
+        uint256 got=_pull(cash,amount);uint256 fee=got*lateFeeBps/10_000;if(fee>0)cash.safeTransfer(creator,fee);
         _buy(got-fee,minOuts,deadline);
         (,uint256[] memory afterBal)=holdings();
         uint256 ratio=type(uint256).max;bool held;
@@ -143,15 +146,15 @@ contract HedgeVault is ERC20Votes, ReentrancyGuard {
         for(uint256 i;i<tokens.length;i++)if(out[i]>0)IERC20(tokens[i]).safeTransfer(msg.sender,out[i]);
         emit Redeemed(msg.sender,shares,false,0);
     }
-    /// @notice Burn shares and sell the slice back to USDT. `minOuts` follow component order; `minTotal` bounds the sum.
-    function redeemToUSDT(uint256 shares,uint256[] calldata minOuts,uint256 minTotal,uint256 deadline) external nonReentrant returns(uint256 total){
+    /// @notice Burn shares and sell the slice back to the cash token. `minOuts` follow component order; `minTotal` bounds the sum.
+    function redeemToCash(uint256 shares,uint256[] calldata minOuts,uint256 minTotal,uint256 deadline) external nonReentrant returns(uint256 total){
         (address[] memory tokens,uint256[] memory out)=_burnFor(shares);
         for(uint256 i;i<tokens.length;i++){
             if(out[i]==0)continue;
-            if(tokens[i]==address(usdt)){total+=out[i];continue;}
+            if(tokens[i]==address(cash)){total+=out[i];continue;}
             total+=_swap(tokens[i],_reverse(_components[i]),out[i],minOuts[i],deadline);
         }
-        if(total<minTotal)revert Invalid();usdt.safeTransfer(msg.sender,total);emit Redeemed(msg.sender,shares,true,total);
+        if(total<minTotal)revert Invalid();cash.safeTransfer(msg.sender,total);emit Redeemed(msg.sender,shares,true,total);
     }
 
     // ---- Basket changes ----
@@ -178,15 +181,15 @@ contract HedgeVault is ERC20Votes, ReentrancyGuard {
         if(mode==Mode.Managed)return true;
         return p.forVotes>p.againstVotes&&p.forVotes*10_000>=p.quorumBase*QUORUM_BPS;
     }
-    /// @notice Creator sells the current basket to USDT and buys the approved one. Mins follow each basket's order.
+    /// @notice Creator sells the current basket to cash and buys the approved one. Mins follow each basket's order.
     function execute(uint256 id,uint256[] calldata sellMins,uint256[] calldata buyMins,uint256 deadline) external nonReentrant {
         if(msg.sender!=creator)revert Unauthorized();if(!passed(id))revert WrongPhase();
         _proposals[id].executed=true;
-        for(uint256 i;i<_components.length;i++){Component memory c=_components[i];if(c.token==address(usdt))continue;
+        for(uint256 i;i<_components.length;i++){Component memory c=_components[i];if(c.token==address(cash))continue;
             uint256 bal=IERC20(c.token).balanceOf(address(this));if(bal>0)_swap(c.token,_reverse(c),bal,sellMins[i],deadline);}
         delete _components;Component[] storage next=_proposalComponents[id];
         for(uint256 i;i<next.length;i++)_components.push(next[i]);
-        _buy(usdt.balanceOf(address(this)),buyMins,deadline);emit Rebalanced(id);
+        _buy(cash.balanceOf(address(this)),buyMins,deadline);emit Rebalanced(id);
     }
 
     // ---- Internals ----
@@ -197,8 +200,8 @@ contract HedgeVault is ERC20Votes, ReentrancyGuard {
     }
     function _buy(uint256 amount,uint256[] calldata minOuts,uint256 deadline) private {
         uint256 n=_components.length;if(minOuts.length!=n)revert Invalid();
-        for(uint256 i;i<n;i++){Component memory c=_components[i];if(c.token==address(usdt))continue;
-            uint256 part=amount*c.weightBps/10_000;if(part>0)_swap(address(usdt),_path(c),part,minOuts[i],deadline);}
+        for(uint256 i;i<n;i++){Component memory c=_components[i];if(c.token==address(cash))continue;
+            uint256 part=amount*c.weightBps/10_000;if(part>0)_swap(address(cash),_path(c),part,minOuts[i],deadline);}
     }
     function _swap(address tokenIn,bytes memory path,uint256 amountIn,uint256 minOut,uint256 deadline) private returns(uint256 out){
         if(minOut==0)revert Invalid();
@@ -207,10 +210,10 @@ contract HedgeVault is ERC20Votes, ReentrancyGuard {
         IERC20(tokenIn).forceApprove(address(router),0);
     }
     function _path(Component memory c) private view returns(bytes memory){
-        return c.mid==address(0)?abi.encodePacked(address(usdt),c.fee1,c.token):abi.encodePacked(address(usdt),c.fee1,c.mid,c.fee2,c.token);
+        return c.mid==address(0)?abi.encodePacked(address(cash),c.fee1,c.token):abi.encodePacked(address(cash),c.fee1,c.mid,c.fee2,c.token);
     }
     function _reverse(Component memory c) private view returns(bytes memory){
-        return c.mid==address(0)?abi.encodePacked(c.token,c.fee1,address(usdt)):abi.encodePacked(c.token,c.fee2,c.mid,c.fee1,address(usdt));
+        return c.mid==address(0)?abi.encodePacked(c.token,c.fee1,address(cash)):abi.encodePacked(c.token,c.fee2,c.mid,c.fee1,address(cash));
     }
     function _pull(IERC20 token,uint256 amount) private returns(uint256){
         if(amount==0)revert Invalid();uint256 before=token.balanceOf(address(this));
